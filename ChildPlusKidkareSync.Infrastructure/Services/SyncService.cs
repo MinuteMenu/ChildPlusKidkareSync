@@ -237,15 +237,10 @@ public class SyncService : ISyncService
             // 2. If new center was created, setup roles and permissions
             if (centerResult.Action == SyncAction.Insert && centerResult.CenterResponse != null)
             {
-                await CreateDefaultRolesAndPermissionsAsync(
-                    tenant,
-                    centerResult.CenterResponse.CenterId,
-                    site.CenterId,
-                    requestId,
-                    kidkareService);
+                await CreateDefaultRolesAndPermissionsAsync(tenant, centerResult.CenterResponse.CenterId, site.CenterId, requestId, kidkareService);
             }
 
-            // 2. Sync Staff for this center
+            // 3. Sync Staff for this center
             var staffList = await _childPlusRepository.GetStaffByCenterIdAsync(tenant.ChildPlusConnectionString, site.CenterId);
             if (!staffList.Any()) return (success, failed, skipped);
 
@@ -341,8 +336,7 @@ public class SyncService : ISyncService
             if (!shouldSync)
             {
                 await LogSyncAsync(tenant, EntityType.Center, site.CenterId, null,
-                    SyncAction.Skip, SyncStatus.Success, "No changes detected",
-                    site.Timestamp, site.CenterId, requestId);
+                    SyncAction.Skip, SyncStatus.Success, "No changes detected", site.Timestamp, site.CenterId, requestId);
 
                 return new CenterSyncResult
                 {
@@ -364,19 +358,34 @@ public class SyncService : ISyncService
             {
                 var action = isNewCenter ? SyncAction.Insert : SyncAction.Update;
 
-                // Parse KK response
-                var jObj = JObject.FromObject(response.Data);
-                var centerModel = jObj["data"]?["CenterInfo"]?.ToObject<CenterResponse>();
+                // Parse Kidkare response to get CenterResponse
+                var centerResponse = ParseCenterResponse(response.Data);
+
+                if (centerResponse == null)
+                {
+                    _logger.LogWarning("Failed to parse center response for {CenterId}", site.CenterId);
+
+                    await LogSyncAsync(tenant, EntityType.Center, site.CenterId, null,
+                        SyncAction.Error, SyncStatus.Failed, "Failed to parse center response",
+                        site.Timestamp, site.CenterId, requestId);
+
+                    return new CenterSyncResult
+                    {
+                        Action = SyncAction.Error,
+                        CenterResponse = null
+                    };
+                }
 
                 // Log center sync
-                await LogSyncAsync(tenant, EntityType.Center, site.CenterId, centerModel.CenterId.ToString(),
+                await LogSyncAsync(tenant, EntityType.Center, site.CenterId,
+                    centerResponse.CenterId.ToString(),
                     action, SyncStatus.Success, response.Message,
                     site.Timestamp, site.CenterId, requestId);
 
                 return new CenterSyncResult
                 {
                     Action = action,
-                    CenterResponse = centerModel
+                    CenterResponse = centerResponse
                 };
             }
             else
@@ -404,6 +413,31 @@ public class SyncService : ISyncService
                 Action = SyncAction.Error,
                 CenterResponse = null
             };
+        }
+    }
+
+    /// <summary>
+    /// Parse center response from Kidkare API
+    /// </summary>
+    private CenterResponse ParseCenterResponse(object responseData)
+    {
+        try
+        {
+            var jObj = Newtonsoft.Json.Linq.JObject.FromObject(responseData);
+            var centerInfo = jObj["data"]?["CenterInfo"];
+
+            if (centerInfo != null)
+            {
+                return centerInfo.ToObject<CenterResponse>();
+            }
+
+            // Fallback: try direct deserialization
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CenterResponse>(responseData.ToString());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error parsing center response");
+            return null;
         }
     }
 
@@ -442,8 +476,7 @@ public class SyncService : ISyncService
 
                     if (assignRoleResp?.IsSuccess == true && assignRoleResp.Data != null)
                     {
-                        _logger.LogInformation("Role '{RoleName}' assigned for center {CenterId}, RoleId={RoleId}",
-                            roleName, centerId, assignRoleResp.Data.RoleId);
+                        _logger.LogInformation("Role '{RoleName}' assigned for center {CenterId}, RoleId={RoleId}", roleName, centerId, assignRoleResp.Data.RoleId);
 
                         // Log role creation to SyncLogTable
                         await LogSyncAsync(tenant, EntityType.Center,
@@ -455,8 +488,7 @@ public class SyncService : ISyncService
                     }
                     else
                     {
-                        _logger.LogWarning("Failed to assign role '{RoleName}' for center {CenterId}: {Message}",
-                            roleName, centerId, assignRoleResp?.Message);
+                        _logger.LogWarning("Failed to assign role '{RoleName}' for center {CenterId}: {Message}", roleName, centerId, assignRoleResp?.Message);
 
                         await LogSyncAsync(tenant, EntityType.Center,
                             $"{sourceCenterId}_Role_{roleName}",
@@ -518,9 +550,7 @@ public class SyncService : ISyncService
 
                             if (permResponse?.IsSuccess == true)
                             {
-                                _logger.LogInformation(
-                                    "Saved permission '{RightName}' for role '{RoleName}' center {CenterId}",
-                                    perm.RightName, roleName, centerId);
+                                _logger.LogInformation("Saved permission '{RightName}' for role '{RoleName}' center {CenterId}", perm.RightName, roleName, centerId);
 
                                 // Log permission creation
                                 await LogSyncAsync(tenant, EntityType.Center,
@@ -532,9 +562,7 @@ public class SyncService : ISyncService
                             }
                             else
                             {
-                                _logger.LogWarning(
-                                    "Failed to save permission '{RightName}' for role '{RoleName}': {Message}",
-                                    perm.RightName, roleName, permResponse?.Message);
+                                _logger.LogWarning("Failed to save permission '{RightName}' for role '{RoleName}': {Message}", perm.RightName, roleName, permResponse?.Message);
 
                                 await LogSyncAsync(tenant, EntityType.Center,
                                     $"{sourceCenterId}_Permission_{roleName}_{perm.RightName}",
@@ -546,9 +574,7 @@ public class SyncService : ISyncService
                         }
                         catch (HttpRequestException httpEx)
                         {
-                            _logger.LogError(httpEx,
-                                "HTTP error saving permission '{RightName}' for role '{RoleName}' (Center {CenterId})",
-                                perm.RightName, roleName, centerId);
+                            _logger.LogError(httpEx, "HTTP error saving permission '{RightName}' for role '{RoleName}' (Center {CenterId})", perm.RightName, roleName, centerId);
 
                             await LogSyncAsync(tenant, EntityType.Center,
                                 $"{sourceCenterId}_Permission_{roleName}_{perm.RightName}",
@@ -559,8 +585,7 @@ public class SyncService : ISyncService
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex,
-                                "Error saving permission '{RightName}' for role '{RoleName}' (Center {CenterId})", perm.RightName, roleName, centerId);
+                            _logger.LogError(ex, "Error saving permission '{RightName}' for role '{RoleName}' (Center {CenterId})", perm.RightName, roleName, centerId);
 
                             await LogSyncAsync(tenant, EntityType.Center,
                                 $"{sourceCenterId}_Permission_{roleName}_{perm.RightName}",
@@ -843,7 +868,7 @@ public class SyncService : ISyncService
                 var child = batch[j];
                 var parseResult = j < response.Data.Count ? response.Data[j] : null;
 
-                // Check if child import succeeded
+                // Check if child import succeeded (no errors and has Id)
                 bool hasErrors = parseResult?.Errors != null && parseResult.Errors.Any();
                 bool hasId = !string.IsNullOrEmpty(parseResult?.Result?.Id.ToString());
                 bool isSuccess = !hasErrors && hasId;
@@ -903,8 +928,7 @@ public class SyncService : ISyncService
             child.Timestamp, child.CenterId, requestId)
         ).ToList();
 
-        await _syncLogRepository.InsertBatchSyncLogsAsync(
-            tenant.KidkareCxSqlConnectionString, logs);
+        await _syncLogRepository.InsertBatchSyncLogsAsync(tenant.KidkareCxSqlConnectionString, logs);
     }
 
     #endregion
