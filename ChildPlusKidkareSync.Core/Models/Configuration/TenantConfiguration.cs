@@ -2,6 +2,7 @@
 
 public class TenantConfiguration
 {
+    public string ClientId { get; set; }
     public string TenantId { get; set; }
     public string TenantName { get; set; }
     public string ChildPlusConnectionString { get; set; }

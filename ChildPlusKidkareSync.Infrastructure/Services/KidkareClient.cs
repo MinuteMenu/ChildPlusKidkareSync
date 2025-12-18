@@ -34,8 +34,7 @@ namespace ChildPlusKidkareSync.Infrastructure.Services
                 var json = JsonConvert.SerializeObject(payload, JsonHelper.DefaultJsonSettings);
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                _logger.LogDebug("Sending {Method} request to {Endpoint} with payload: {Payload}",
-                    method, endpoint, json);
+                _logger.LogDebug("Sending {Method} request to {Endpoint} with payload: {Payload}", method, endpoint, json);
             }
 
             var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -43,12 +42,10 @@ namespace ChildPlusKidkareSync.Infrastructure.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError(
-                    "{Method} {Endpoint} failed with {StatusCode} {Reason}. Response: {Response}",
+                _logger.LogError("{Method} {Endpoint} failed with {StatusCode} {Reason}. Response: {Response}",
                     method, endpoint, (int)response.StatusCode, response.ReasonPhrase, responseBody);
 
-                throw new HttpRequestException(
-                    $"{method} {endpoint} failed with {(int)response.StatusCode} {response.ReasonPhrase}. Response body: {responseBody}");
+                throw new HttpRequestException($"{method} {endpoint} failed with {(int)response.StatusCode} {response.ReasonPhrase}. Response body: {responseBody}");
             }
 
             _logger.LogDebug("Received response from {Endpoint}: {Response}", endpoint, responseBody);
