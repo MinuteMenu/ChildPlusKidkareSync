@@ -28,8 +28,6 @@ public class SyncSchedulerFunction
 
         try
         {
-            var value = _configuration["SyncConfiguration:CronSchedule"];
-
             // Get the function app base URL
             var functionUrl = Environment.GetEnvironmentVariable("FUNCTION_APP_URL");
             var syncEndpoint = $"{functionUrl}/ok-school/childplus-integration";
@@ -46,8 +44,7 @@ public class SyncSchedulerFunction
             }
             else
             {
-                _logger.LogError(
-                    "Sync failed with status code: {StatusCode}, Reason: {Reason}", response.StatusCode, response.ReasonPhrase);
+                _logger.LogError("Sync failed with status code: {StatusCode}, Reason: {Reason}", response.StatusCode, response.ReasonPhrase);
             }
         }
         catch (Exception ex)

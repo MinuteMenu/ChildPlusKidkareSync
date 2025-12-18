@@ -1,0 +1,80 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "FUNCTION_APP_URL": "http://localhost:7054",
+    //"FUNCTION_APP_URL": "https://mmqa1-api.kidkare.com",
+    "SyncConfiguration:CronSchedule": "0 0 */1 * * *"
+  },
+  "SyncConfiguration": {
+    "CronSchedule": "0 0 */1 * * *",
+    "BatchSize": 100,
+    "MaxParallelTenants": 4,
+    "MaxParallelSites": 5,
+    "RateLimitPerMinute": 60,
+    "RetryAttempts": 3,
+    "RetryDelaySeconds": 5
+  },
+  "Tenants": [
+    {
+      "ClientId": "7296", // Oklahoma
+      "TenantId": "55555555-6666-7777-FFFF-CCCCCCCCCCCC", //CADC Head Start
+      "TenantName": "United Community Action Program, Inc.",
+      "ChildPlusConnectionString": "Server=172.23.85.85,1433;Database=CADCOK;User Id=ReadOnly_48176;Password=xD2e28PL4WV2ayKkG7Nv;Connection Timeout=360;Encrypt=True;TrustServerCertificate=True;",
+      "KidkareApiBaseUrl": "https://dev1apim.azure-api.net",
+      "KidkareApiKey": "your-api-key-1",
+      "KidkareCxSqlConnectionString": "server=qacx1.minutemenu.com;database=CXADMIN;user id=mmqacx1;password=0buuSQy6;Connection Timeout=300;Encrypt=true;TrustServerCertificate=true;",
+      "KidkareHxSqlConnectionString": "user id=mmqahx1;password=oFA7aCLQ;server=qahx1.minutemenu.com,49626;connection timeout=360;database=MMADMIN;MultipleActiveResultSets=true;Encrypt=true;TrustServerCertificate=true;",
+      "Enabled": true
+    },
+    {
+      "ClientId": null,
+      "TenantId": "tenant-002",
+      "TenantName": "Client B",
+      "ChildPlusConnectionString": "Server=172.23.85.85,1433;Database=CADCOK;User Id=ReadOnly_48176;Password=xD2e28PL4WV2ayKkG7Nv;Connection Timeout=360;Encrypt=True;TrustServerCertificate=True;",
+      "KidkareApiBaseUrl": "https://dev1apim.azure-api.net",
+      "KidkareApiKey": "your-api-key-2",
+      "KidkareCxSqlConnectionString": "server=qacx1.minutemenu.com;database=CXADMIN;user id=mmqacx1;password=0buuSQy6;Connection Timeout=300;Encrypt=true;TrustServerCertificate=true;",
+      "KidkareHxSqlConnectionString": "user id=mmqahx1;password=oFA7aCLQ;server=qahx1.minutemenu.com,49626;connection timeout=360;database=MMADMIN;MultipleActiveResultSets=true;Encrypt=true;TrustServerCertificate=true;",
+      "Enabled": false
+    },
+    {
+      "ClientId": null,
+      "TenantId": "tenant-003",
+      "TenantName": "Client C",
+      "ChildPlusConnectionString": "Server=172.23.85.85,1433;Database=CADCOK;User Id=ReadOnly_48176;Password=xD2e28PL4WV2ayKkG7Nv;Connection Timeout=360;Encrypt=True;TrustServerCertificate=True;",
+      "KidkareApiBaseUrl": "https://dev1apim.azure-api.net",
+      "KidkareApiKey": "your-api-key-3",
+      "KidkareCxSqlConnectionString": "server=qacx1.minutemenu.com;database=CXADMIN;user id=mmqacx1;password=0buuSQy6;Connection Timeout=300;Encrypt=true;TrustServerCertificate=true;",
+      "KidkareHxSqlConnectionString": "user id=mmqahx1;password=oFA7aCLQ;server=qahx1.minutemenu.com,49626;connection timeout=360;database=MMADMIN;MultipleActiveResultSets=true;Encrypt=true;TrustServerCertificate=true;",
+      "Enabled": false
+    },
+    {
+      "ClientId": null,
+      "TenantId": "tenant-004",
+      "TenantName": "Client D",
+      "ChildPlusConnectionString": "Server=172.23.85.85,1433;Database=CADCOK;User Id=ReadOnly_48176;Password=xD2e28PL4WV2ayKkG7Nv;Connection Timeout=360;Encrypt=True;TrustServerCertificate=True;",
+      "KidkareApiBaseUrl": "https://dev1apim.azure-api.net",
+      "KidkareApiKey": "your-api-key-4",
+      "KidkareCxSqlConnectionString": "server=qacx1.minutemenu.com;database=CXADMIN;user id=mmqacx1;password=0buuSQy6;Connection Timeout=300;Encrypt=true;TrustServerCertificate=true;",
+      "KidkareHxSqlConnectionString": "user id=mmqahx1;password=oFA7aCLQ;server=qahx1.minutemenu.com,49626;connection timeout=360;database=MMADMIN;MultipleActiveResultSets=true;Encrypt=true;TrustServerCertificate=true;",
+      "Enabled": false
+    }
+  ],
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "ChildPlusKidkareSync": "Debug"
+    },
+    "ApplicationInsights": {
+      "LogLevel": {
+        "Default": "Information"
+      }
+    }
+  },
+  "ApplicationInsights": {
+    "InstrumentationKey": "your-app-insights-key"
+  }
+}

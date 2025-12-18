@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ChildPlusKidkareSync.Infrastructure\Data\Scripts\" />
     <Folder Include="ChildPlusKidkareSync.Tests\" />
   </ItemGroup>
 

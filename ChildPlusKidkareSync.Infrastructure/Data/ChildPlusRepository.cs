@@ -11,8 +11,8 @@ namespace ChildPlusKidkareSync.Infrastructure.Data;
 public interface IChildPlusRepository
 {
     Task<List<ChildPlusSite>> GetSitesAsync(string tenantId, string connectionString);
-    Task<List<ChildPlusStaff>> GetStaffByCenterIdAsync(string connectionString, string centerId);
-    Task<List<ChildPlusChild>> GetChildrenByCenterIdAsync(string connectionString, string centerId);
+    Task<List<ChildPlusStaff>> GetStaffsBySiteIdAsync(string connectionString, string siteId);
+    Task<List<ChildPlusChild>> GetChildrenBySiteIdAsync(string connectionString, string siteId);
     Task<List<ChildPlusGuardian>> GetGuardiansByChildIdAsync(string connectionString, string childId);
     Task<List<ChildPlusEnrollment>> GetEnrollmentsByChildIdAsync(string connectionString, string childId);
     Task<List<ChildPlusAttendance>> GetAttendanceByChildIdAsync(string connectionString, string childId);
@@ -27,6 +27,9 @@ public class ChildPlusRepository : IChildPlusRepository
         _logger = logger;
     }
 
+    /// <summary>
+    /// Get sites with composite timestamp support
+    /// </summary>
     public async Task<List<ChildPlusSite>> GetSitesAsync(string tenantId, string connectionString)
     {
         try
@@ -42,34 +45,34 @@ public class ChildPlusRepository : IChildPlusRepository
         }
     }
 
-    public async Task<List<ChildPlusStaff>> GetStaffByCenterIdAsync(string connectionString, string centerId)
+    public async Task<List<ChildPlusStaff>> GetStaffsBySiteIdAsync(string connectionString, string siteId)
     {
         try
         {
             using var connection = new SqlConnection(connectionString);
-            var staff = await connection.QueryAsync<ChildPlusStaff>(SyncConstants.SqlQueries.GetStaffByCenterId, new { CenterId = centerId });
+            var staff = await connection.QueryAsync<ChildPlusStaff>(SyncConstants.SqlQueries.GetStaffBySiteId, new { SiteId = siteId });
             return staff.ToList();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching staff for center {CenterId}", centerId);
+            _logger.LogError(ex, "Error fetching staff for site {SiteId}", siteId);
             throw;
         }
     }
 
-    public async Task<List<ChildPlusChild>> GetChildrenByCenterIdAsync(string connectionString, string centerId)
+    public async Task<List<ChildPlusChild>> GetChildrenBySiteIdAsync(string connectionString, string siteId)
     {
         try
         {
             using var connection = new SqlConnection(connectionString);
             var children = await connection.QueryAsync<ChildPlusChild>(
-                SyncConstants.SqlQueries.GetChildrenByCenterId,
-                new { CenterId = centerId });
+                SyncConstants.SqlQueries.GetChildrenBySiteId,
+                new { SiteId = siteId });
             return children.ToList();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching children for center {CenterId}", centerId);
+            _logger.LogError(ex, "Error fetching children for site {SiteId}", siteId);
             throw;
         }
     }

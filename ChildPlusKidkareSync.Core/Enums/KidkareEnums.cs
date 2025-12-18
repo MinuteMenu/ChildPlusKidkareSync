@@ -243,4 +243,86 @@
         Removed = 207,
         Deleted = 290
     }
+
+    public enum ProfitTypeCode : short
+    {
+        Undefined = 0,
+        TitleXXorXIX = 1627,
+        FRP = 1628
+    }
+
+    public enum FundingSourceCode : short
+    {
+        NA = 919,
+        Alzheimers = 920,
+        Latckey = 921,
+        Migrant = 922,
+        StatePreschool = 923
+    }
+
+    public enum ServingCode : short
+    {
+        First = 215,
+        Second = 216,
+        Third = 217
+    }
+
+    public enum AdministrationTypeCode : short
+    {
+        Unknown = 0,
+        SeparatedFromSponsor = 1625,
+        AffiliatedWithSponsor = 1626
+    }
+
+    public enum RecordAttendanceDateTimeLimitation : short
+    {
+        None = 1646,
+        ByEndOfDay = 1647,
+        DuringMealServiceTimes = 1648,
+        ByEndOfWeek = 1706
+    }
+
+    public enum BankAccountCode : short
+    {
+        Undefined = 0,
+        Checking = 177,
+        Savings = 178,
+        MoneyMarket = 179
+    }
+
+    public enum MonthCode : short
+    {
+        None = 0,
+        Jan = 506,
+        Feb = 507,
+        Mar = 508,
+        Apr = 509,
+        May = 510,
+        Jun = 511,
+        Jul = 512,
+        Aug = 513,
+        Sep = 514,
+        Oct = 515,
+        Nov = 516,
+        Dec = 517
+    }
+
+    public enum RemovalReasonCode : short
+    {
+        Unknown = 0,
+        OutOfBusiness = 1,
+        SwitchingSponsors = 2,
+        DroppingTheFoodProgram = 3,
+        ClosedByStateOrCounty = 4,
+        TerminatedForCause = 5,
+        TerminatedForConvenience = 6,
+        Other = 7
+    }
+
+    public enum CxAttendanceImportMethod
+    {
+        Manual = 1,
+        Auto = 2,
+        Partially = 3
+    }
 }

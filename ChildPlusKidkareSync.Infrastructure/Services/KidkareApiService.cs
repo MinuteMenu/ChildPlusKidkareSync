@@ -14,6 +14,7 @@ public interface IKidkareService
     Task<ResponseWithData<RoleAddResponse>> AssignRoleAsync(RoleModel role, CancellationToken cancellationToken = default);
     Task<ResponseWithData<object>> SavePermissionAsync(SaveStaffPermissionRequest perm, CancellationToken cancellationToken = default);
     Task<ResponseWithData<CenterStaffModel>> SaveStaffAsync(CenterStaffAddRequest staff, CancellationToken cancellationToken = default);
+    Task<ResponseWithData<object>> UpdateStaffAsync(CenterStaffUpdateRequest staff, CancellationToken cancellationToken = default);
     Task<ResponseWithData<List<ParseResult<CxChildModel>>>> FinalizeImportAsync(List<ParseResult<CxChildModel>> children, string centerName, CancellationToken cancellationToken = default);
 }
 
@@ -49,7 +50,7 @@ public class KidkareService : IKidkareService
                 _logger.LogWarning("Failed to create center {CenterName}: {Message}", centerName, response?.Message);
             }
 
-            return response ?? ResponseWithData<object>.Fail("Empty response from API");
+            return response ?? ResponseWithData<object>.Fail("Failed to save center");
         }
         catch (HttpRequestException httpEx)
         {
@@ -83,7 +84,7 @@ public class KidkareService : IKidkareService
                 _logger.LogWarning("Failed to fetch roles for centerId: {CenterId}. Message: {Message}", centerId, response?.Message);
             }
 
-            return response ?? ResponseWithData<List<RoleModel>>.Fail("Empty response from API");
+            return response ?? ResponseWithData<List<RoleModel>>.Fail("Failed to get role");
         }
         catch (HttpRequestException httpEx)
         {
@@ -106,7 +107,7 @@ public class KidkareService : IKidkareService
             var result = await _client.PutAsync(SyncConstants.ApiEndpoints.AddRole, role, cancellationToken);
             var response = ResponseWithData<RoleAddResponse>.Success(JsonConvert.DeserializeObject<RoleAddResponse>(result));
 
-            if (response?.IsSuccess == true)
+            if (response?.IsSuccess == true && response.Data != null)
             {
                 _logger.LogInformation("Successfully assigned role: {RoleName} to centerId: {CenterId}", role?.RoleName, role?.CenterId);
             }
@@ -115,7 +116,7 @@ public class KidkareService : IKidkareService
                 _logger.LogWarning("Failed to assign role: {RoleName} to centerId: {CenterId}. Message: {Message}", role?.RoleName, role?.CenterId, response?.Message);
             }
 
-            return response ?? ResponseWithData<RoleAddResponse>.Fail("Empty response from API");
+            return response ?? ResponseWithData<RoleAddResponse>.Fail("Failed to save role");
         }
         catch (HttpRequestException httpEx)
         {
@@ -147,7 +148,7 @@ public class KidkareService : IKidkareService
                 _logger.LogWarning("Failed to save permission: {RightName}. Message: {Message}", perm?.RightName, response?.Message);
             }
 
-            return response ?? ResponseWithData<object>.Fail("Empty response from API");
+            return response ?? ResponseWithData<object>.Fail("Failed to save permission");
         }
         catch (HttpRequestException httpEx)
         {
@@ -180,7 +181,7 @@ public class KidkareService : IKidkareService
                 _logger.LogWarning("Failed to create staff {FirstName} {LastName}: {Message}", staff?.FirstName, staff?.LastName, response?.Message);
             }
 
-            return response ?? ResponseWithData<CenterStaffModel>.Fail("Empty response from API");
+            return response ?? ResponseWithData<CenterStaffModel>.Fail("Failed to save staff");
         }
         catch (HttpRequestException httpEx)
         {
@@ -212,7 +213,7 @@ public class KidkareService : IKidkareService
                 _logger.LogWarning("Failed to update staff: {Staff}. Message: {Message}", staff, response?.Message);
             }
 
-            return response ?? ResponseWithData<object>.Fail("Empty response from API");
+            return response ?? ResponseWithData<object>.Fail("Failed to update staff");
         }
         catch (HttpRequestException httpEx)
         {
@@ -256,7 +257,7 @@ public class KidkareService : IKidkareService
             else
             {
                 _logger.LogWarning("Empty response from FinalizeImport for center {CenterName}", centerName);
-                return ResponseWithData<List<ParseResult<CxChildModel>>>.Fail("Empty response from API");
+                return ResponseWithData<List<ParseResult<CxChildModel>>>.Fail("Failed to save children");
             }
         }
         catch (HttpRequestException httpEx)
